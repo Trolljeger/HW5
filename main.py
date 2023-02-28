@@ -28,14 +28,50 @@ class BaseMachine:
         :param detail_price: средняя цена детали, float
         '''
 
-        if(int != type(productivity) or float != type(machine_price) or float != type(detail_price)):
-            raise TypeError(
-                f'Неверный тип входных данных. \n'
-            )
-
         self.prod = productivity
         self.m_price = machine_price
         self.d_price = detail_price
+
+    @property
+    def prod(self):
+        return self._prod
+
+    @prod.setter
+    def prod(self, productivity):
+        if not isinstance(productivity, int):
+            raise TypeError('Производительность станка должна быть типа int')
+        if productivity < 0. :
+            raise ValueError('Производительность станка должна быть положительной')
+
+        self._prod = productivity
+
+    @property
+    def m_price(self):
+        return self._m_price
+
+    @m_price.setter
+    def m_price(self, machine_price):
+        if not isinstance(machine_price, float):
+            raise TypeError('Стоимость станка должна быть типа float')
+        if machine_price < 0. :
+            raise ValueError('Стоимость станка должна быть положительной')
+
+        self._m_price = machine_price
+
+    @property
+    def d_price(self):
+        return self._d_price
+
+    @d_price.setter
+    def d_price(self, detail_price):
+        if not isinstance(detail_price, float):
+            raise TypeError('Стоимость детали должна быть типа float')
+        if detail_price < 0. :
+            raise ValueError('Стоимость детали должна быть положительной')
+
+        self._d_price = detail_price
+
+
 
     def __str__(self):
         '''
@@ -91,7 +127,7 @@ class MillingMachine(BaseMachine):
     '''
     Класс Фрезерный станок
     '''
-    def __init__(self, productivity, machine_price, detail_price, type):
+    def __init__(self, productivity, machine_price, detail_price, type = 'MillingMachine'):
         '''
         Конструктор объекта типа MillingMachine
         :param productivity: производительность станка (изделий в час), int
@@ -101,6 +137,18 @@ class MillingMachine(BaseMachine):
         '''
         super().__init__(productivity, machine_price, detail_price)
         self.m_type = type
+
+
+    @property
+    def m_type(self):
+        return self._m_type
+
+    @m_type.setter
+    def m_type(self, type):
+        if not isinstance(type, str):
+            raise TypeError('Тип станка должен быть задан типом str')
+
+        self._m_type = type
 
 
     def __str__(self):
@@ -116,17 +164,33 @@ class CncMachine(MillingMachine):
     Класс Станок с ЧПУ
     '''
 
-    def __init__(self, productivity, machine_price, detail_price, type, acceleration):
+    def __init__(self, productivity, machine_price, detail_price, type, acceleration = 1):
         '''
         Конструктор объекта типа CncMachine
         :param productivity: производительность станка (изделий в час), int
         :param machine_price: стоимость станка, float
         :param detail_price: средняя цена детали, float
         :param type: Тип станка, str
-        :param acceleration: Коэффициент ускорения производительности
+        :param acceleration: Коэффициент ускорения производительности, int
         '''
         super().__init__(productivity, machine_price, detail_price, type)
         self.accel = acceleration
+        self.prod = self.prod * self.accel
+
+    @property
+    def accel(self):
+        return self._accel
+
+    @accel.setter
+    def accel(self, acceleration):
+        if not isinstance(acceleration, int):
+            raise TypeError('Ускорение производительности станка должна быть типа int')
+        if acceleration < 1. :
+            raise ValueError('Ускорение производительности станка должно быть больше 1')
+
+        self._accel = acceleration
+
+
 
     def __str__(self):
         '''
@@ -134,23 +198,6 @@ class CncMachine(MillingMachine):
         :return: строка описания
         '''
         return super().__str__() + f'Ускорение производительности == >> {self.accel}\n'
-
-
-    def calc_payback_time(self):
-        '''
-        Функция вычисления времени окупаемости станка с учетом ускорения
-        :return: время окупаемости
-        '''
-
-        payback_time = super().calc_payback_time()
-        try:
-            payback_time = math.ceil(payback_time/self.accel)
-        except ZeroDivisionError as ex:
-            print('calc_payback_time:: Установлено нулевое ускорение производительности.')
-            raise ex
-
-        return payback_time
-
 
 
 
@@ -165,7 +212,7 @@ pb_time = bm.calc_payback_time()
 print(f'Для окупаемости станка необходимо {pb_time} часов\n')
 
 #==============================================================================
-mm = MillingMachine(100, 20001., 5.2, 'MillingMachine')
+mm = MillingMachine(100, 20001., 5.2)
 print(mm)
 payback_num = mm.calc_payback_details()
 print(f'Для окупаемости станка необходимо произвести {payback_num} деталей')
@@ -174,7 +221,7 @@ pb_time = mm.calc_payback_time()
 print(f'Для окупаемости станка необходимо {pb_time} часов\n')
 
 #==============================================================================
-cm = CncMachine(100, 20001., 5.2, 'CncMachine', 2)
+cm = CncMachine(100, 20001., 5.2, 'CncMachine', 1)
 print(cm)
 payback_num = cm.calc_payback_details()
 print(f'Для окупаемости станка необходимо произвести {payback_num} деталей')
