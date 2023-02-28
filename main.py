@@ -72,6 +72,17 @@ class BaseMachine:
         self._d_price = detail_price
 
 
+    def __add__(self, other):
+        '''
+        Функция сложения производительности двух станков
+        :param other: объект типа станок
+        :return: новый объект со средней стоимостью и суммарной производительностью
+        '''
+        if isinstance(other, self.__class__):
+            return self.__class__(self.prod + other.prod, (self.m_price + other.m_price)/2., self.d_price)
+        else:
+            raise TypeError(f'Не могу объединить производительность станков {self.__class__} и {type(other)}')
+
 
     def __str__(self):
         '''
@@ -150,13 +161,27 @@ class MillingMachine(BaseMachine):
 
         self._m_type = type
 
+    def __add__(self, other):
+        '''
+        Функция сложения производительности двух станков
+        :param other: объект типа станок
+        :return: новый объект со средней стоимостью и суммарной производительностью
+        '''
+        if isinstance(other, self.__class__):
+            return self.__class__(self.prod + other.prod,
+                                  (self.m_price + other.m_price)/2.,
+                                  self.d_price,
+                                  self.m_type + '+' + other.m_type)
+        else:
+            raise TypeError(f'Не могу объединить производительность станков {self.__class__} и {type(other)}')
+
 
     def __str__(self):
         '''
         Вывод параметров объекта в текстовом формате
         :return: строка описания
         '''
-        return  super().__str__() + f'Тип станка == >> {self.m_type}\n'
+        return  super().__str__() + f'Тип станка ==>> {self.m_type}\n'
 
 
 class CncMachine(MillingMachine):
@@ -190,17 +215,31 @@ class CncMachine(MillingMachine):
 
         self._accel = acceleration
 
-
+    def __add__(self, other):
+        '''
+        Функция сложения производительности двух станков
+        :param other: объект типа станок
+        :return: новый объект со средней стоимостью и суммарной производительностью
+        '''
+        if isinstance(other, self.__class__):
+            return self.__class__(self.prod + other.prod,
+                                  (self.m_price + other.m_price) / 2.,
+                                  self.d_price,
+                                  self.m_type + '+' + other.m_type,
+                                  (self.accel + other.accel) // 2)
+        else:
+            raise TypeError(f'Не могу объединить производительность станков {self.__class__} и {type(other)}')
 
     def __str__(self):
         '''
         Вывод параметров объекта в текстовом формате
         :return: строка описания
         '''
-        return super().__str__() + f'Ускорение производительности == >> {self.accel}\n'
+        return super().__str__() + f'Ускорение производительности ==>> {self.accel}\n'
 
 
-
+#==============================================================================
+#       Проверка базового класса BaseMachine
 #==============================================================================
 bm = BaseMachine(100, 10000., 5.)
 print(bm)
@@ -211,6 +250,9 @@ print(f'Для окупаемости станка необходимо прои
 pb_time = bm.calc_payback_time()
 print(f'Для окупаемости станка необходимо {pb_time} часов\n')
 
+
+#==============================================================================
+#       Проверка класса MillingMachine
 #==============================================================================
 mm = MillingMachine(100, 20001., 5.2)
 print(mm)
@@ -220,11 +262,41 @@ print(f'Для окупаемости станка необходимо прои
 pb_time = mm.calc_payback_time()
 print(f'Для окупаемости станка необходимо {pb_time} часов\n')
 
+
 #==============================================================================
-cm = CncMachine(100, 20001., 5.2, 'CncMachine', 1)
+#       Проверка класса CncMachine
+#==============================================================================
+cm = CncMachine(100, 20001., 5.2, 'CncMachine', 2)
 print(cm)
 payback_num = cm.calc_payback_details()
 print(f'Для окупаемости станка необходимо произвести {payback_num} деталей')
 
 pb_time = cm.calc_payback_time()
 print(f'Для окупаемости станка необходимо {pb_time} часов\n')
+
+
+#==============================================================================
+#       Проверка сложения производительности
+#==============================================================================
+
+bm1 = BaseMachine(100, 10000., 5.)
+bm2 = BaseMachine(100, 5000., 5.)
+summ_bm = bm1 + bm2
+print(summ_bm)
+
+
+mm1 = MillingMachine(100, 10000., 5.)
+mm2 = MillingMachine(100, 5000., 5.)
+summ_mm = mm1 + mm2
+print(summ_mm)
+
+cm1 = CncMachine(100, 10000., 5., 'CNC_100', 1)
+cm2 = CncMachine(100, 5000., 5., 'CNC_200', 2)
+summ_cm = cm1 + cm2
+print(summ_cm)
+
+summ_rm = bm1 + cm2
+print(summ_rm)
+
+
+
